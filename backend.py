@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS 
 
 import requests
@@ -43,7 +43,14 @@ def get_job_data():
     job_title = request.args.get('job_title', 'Software Developer')
     city = request.args.get('city', 'Leeds')
     job_title_data = [row for row in scrape_data(job_title.replace("+", " "), city.replace("+", " ")) if row[0] == job_title]
-    return jsonify(job_title_data)
+    
+    # Create a Flask response
+    response = make_response(jsonify(job_title_data))
+    
+    # Set the Access-Control-Allow-Origin header to allow requests from any origin
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
