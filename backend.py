@@ -53,7 +53,7 @@ def get_job_data():
         city = 'Leeds'
 
     job_title_data = [row for row in scrape_data(job_title.replace("+", " "), city.replace("+", " ")) if row[0] == job_title]
-    return jsonify(job_title_data)
+    return jsonify(job_title_data[0])
 
 if __name__ == '__main__':
     app.run(debug=True)
