@@ -44,6 +44,14 @@ def scrape_data(job_title, city):
 def get_job_data():
     job_title = request.args.get('job_title', 'Software Developer')
     city = request.args.get('city', 'Leeds')
+    # Check if job_title is empty string, if so, assign default value
+    if not job_title:
+        job_title = 'Software Developer'
+
+    # Check if city is empty string, if so, assign default value
+    if not city:
+        city = 'Leeds'
+
     job_title_data = [row for row in scrape_data(job_title.replace("+", " "), city.replace("+", " ")) if row[0] == job_title]
     return jsonify(job_title_data)
 
