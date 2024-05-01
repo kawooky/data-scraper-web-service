@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-base_url = f'https://www.itjobswatch.co.uk'
 
 def scrape_data(job_title, city):
     url = f'https://www.itjobswatch.co.uk/default.aspx?q=&ql={job_title.replace(" ", "+")}&ll={city.replace(" ", "+")}&id=0&p=6&e=5&sortby=&orderby='
@@ -16,7 +15,6 @@ def scrape_data(job_title, city):
 
     def get_next_page_link(soup):
         return soup.find('a', string='Next')
-    
 
     def fetch_page(url):
         response = requests.get(url)
@@ -34,44 +32,14 @@ def scrape_data(job_title, city):
             break
 
     return all_rows
-
-
-def skills_scrape (job_title, city):
-    url = f'https://www.itjobswatch.co.uk/default.aspx?q=&ql={job_title.replace(" ", "+")}&ll={city.replace(" ", "+")}&id=0&p=6&e=5&sortby=&orderby='
-
-    def get_skills_page_href(soup):
-        return soup.find('a', string=job_title)['href']
-    
-    def fetch_page(url):
-        response = requests.get(url)
-        return BeautifulSoup(response.text, 'html.parser')
-
-    soup = fetch_page(url)
-
-    skill_soup = fetch_page(f'{base_url}{get_skills_page_href(soup)}')
-
-    itab_table = skill_soup.find('table', class_='itab')
-    rows = itab_table.find_all('tr')
-    data = [[cell.get_text(strip=True) for cell in row.find_all(['td', 'th'])] for row in rows]
-
-    return data
     
 
 @app.route('/job_data')
 def get_job_data():
     job_title = request.args.get('job_title', 'Software Developer')
     city = request.args.get('city', 'Leeds')
-    
-    # Retrieve job data and replace spaces with '+' for consistency
-    job_title_data = scrape_data(job_title.replace("+", " "), city.replace("+", " "))
-    
-    # Call the skills_scrape function to get additional data
-    additional_data = skills_scrape(job_title, city)
-    
-    # Return a nested array containing both sets of data
-    return jsonify([job_title_data[0], additional_data])
-
-
+    job_title_data = [row for row in scrape_data(job_title.replace("+", " "), city.replace("+", " ")) if row[0] == job_title]
+    return jsonify(job_title_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
