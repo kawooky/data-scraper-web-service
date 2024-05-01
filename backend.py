@@ -1,9 +1,14 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS , cross_origin
+
 import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
+CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 base_url = f'https://www.itjobswatch.co.uk'
+
 
 def scrape_data(job_title, city):
     url = f'https://www.itjobswatch.co.uk/default.aspx?q=&ql={job_title.replace(" ", "+")}&ll={city.replace(" ", "+")}&id=0&p=6&e=5&sortby=&orderby='
@@ -58,20 +63,27 @@ def skills_scrape (job_title, city):
     
 
 @app.route('/job_data')
+@cross_origin()
 def get_job_data():
     job_title = request.args.get('job_title', 'Software Developer')
     city = request.args.get('city', 'Leeds')
-    
-    # Retrieve job data and replace spaces with '+' for consistency
+    # Check if job_title is empty string, if so, assign default value
+    if not job_title:
+        job_title = 'Software Developer'
+
+    # Check if city is empty string, if so, assign default value
+    if not city:
+        city = 'Leeds'
+
+            # Retrieve job data and replace spaces with '+' for consistency
     job_title_data = scrape_data(job_title.replace("+", " "), city.replace("+", " "))
     
     # Call the skills_scrape function to get additional data
     additional_data = skills_scrape(job_title, city)
-    
+
+
     # Return a nested array containing both sets of data
     return jsonify([job_title_data[0], additional_data])
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
