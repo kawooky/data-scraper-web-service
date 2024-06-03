@@ -66,16 +66,16 @@ def skills_scrape (job_title, city):
 @cross_origin()
 def get_job_data():
     job_title = request.args.get('job_title', 'Software Developer')
-    city = request.args.get('city', 'Leeds')
+    city = request.args.get('city', '')
     # Check if job_title is empty string, if so, assign default value
     if not job_title:
         job_title = 'Software Developer'
 
     # Check if city is empty string, if so, assign default value
     if not city:
-        city = 'Leeds'
+        city = ''
 
-            # Retrieve job data and replace spaces with '+' for consistency
+    # Retrieve job data and replace spaces with '+' for consistency
     job_title_data = scrape_data(job_title.replace("+", " "), city.replace("+", " "))
     
     # Call the skills_scrape function to get additional data
